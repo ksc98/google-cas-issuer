@@ -1,0 +1,46 @@
+suite: Additional volumes, volume mounts and environment variables
+templates:
+  - templates/deployment.yaml
+release:
+  name: rel
+  namespace: cert-manager
+tests:
+  - it: renders no env, volumeMounts or volumes by default
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].env
+      - notExists:
+          path: spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.template.spec.volumes
+
+  - it: passes volumes, volumeMounts and extraEnv through to the pod
+    set:
+      volumes:
+        - name: gcp-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  audience: //iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/provider
+                  expirationSeconds: 3600
+                  path: token
+      volumeMounts:
+        - name: gcp-token
+          mountPath: /var/run/secrets/gcp
+          readOnly: true
+      extraEnv:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/run/secrets/gcp-config/credentials.json
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].name
+          value: gcp-token
+      - equal:
+          path: spec.template.spec.volumes[0].projected.sources[0].serviceAccountToken.path
+          value: token
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/run/secrets/gcp
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: GOOGLE_APPLICATION_CREDENTIALS

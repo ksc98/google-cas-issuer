@@ -21,6 +21,9 @@
         "enabled": {
           "$ref": "#/$defs/helm-values.enabled"
         },
+        "extraEnv": {
+          "$ref": "#/$defs/helm-values.extraEnv"
+        },
         "global": {
           "$ref": "#/$defs/helm-values.global"
         },
@@ -65,6 +68,12 @@
         },
         "topologySpreadConstraints": {
           "$ref": "#/$defs/helm-values.topologySpreadConstraints"
+        },
+        "volumeMounts": {
+          "$ref": "#/$defs/helm-values.volumeMounts"
+        },
+        "volumes": {
+          "$ref": "#/$defs/helm-values.volumes"
         }
       },
       "type": "object"
@@ -203,6 +212,12 @@
       "description": "Field to optionally disable installation of the chart when wrapping it as a dependency in another chart.\nThis matches the Helm best practices:\nhttps://helm.sh/docs/chart_best_practices/dependencies/#conditions-and-tags",
       "type": "boolean"
     },
+    "helm-values.extraEnv": {
+      "default": [],
+      "description": "Additional environment variables to set in the google-cas-issuer container.\n\nFor example, point Application Default Credentials at an external_account credential configuration:\nextraEnv:\n- name: GOOGLE_APPLICATION_CREDENTIALS\n  value: /var/run/secrets/gcp-config/credentials.json",
+      "items": {},
+      "type": "array"
+    },
     "helm-values.global": {
       "description": "Global values shared across all (sub)charts"
     },
@@ -330,6 +345,18 @@
     "helm-values.topologySpreadConstraints": {
       "default": [],
       "description": "List of Kubernetes TopologySpreadConstraints.\n\nFor example:\ntopologySpreadConstraints:\n- maxSkew: 2\n  topologyKey: topology.kubernetes.io/zone\n  whenUnsatisfiable: ScheduleAnyway\n  labelSelector:\n    matchLabels:\n      app.kubernetes.io/instance: cert-manager\n      app.kubernetes.io/component: controller",
+      "items": {},
+      "type": "array"
+    },
+    "helm-values.volumeMounts": {
+      "default": [],
+      "description": "Additional volume mounts to add to the google-cas-issuer container.\n\nFor example:\nvolumeMounts:\n- name: gcp-token\n  mountPath: /var/run/secrets/gcp\n  readOnly: true",
+      "items": {},
+      "type": "array"
+    },
+    "helm-values.volumes": {
+      "default": [],
+      "description": "Additional volumes to add to the google-cas-issuer Pod.\n\nFor example, a projected service account token for workload identity federation from a cluster outside Google Cloud:\nvolumes:\n- name: gcp-token\n  projected:\n    sources:\n    - serviceAccountToken:\n        audience: //iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider\n        expirationSeconds: 3600\n        path: token",
       "items": {},
       "type": "array"
     }

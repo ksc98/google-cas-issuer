@@ -267,6 +267,57 @@ topologySpreadConstraints:
 > ```
 
 Optional priority class to be used for the google-cas-issuer pods.
+#### **volumes** ~ `array`
+> Default value:
+> ```yaml
+> []
+> ```
+
+Additional volumes to add to the google-cas-issuer Pod.  
+  
+For example, a projected service account token for workload identity federation from a cluster outside Google Cloud:
+
+```yaml
+volumes:
+- name: gcp-token
+  projected:
+    sources:
+    - serviceAccountToken:
+        audience: //iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+        expirationSeconds: 3600
+        path: token
+```
+#### **volumeMounts** ~ `array`
+> Default value:
+> ```yaml
+> []
+> ```
+
+Additional volume mounts to add to the google-cas-issuer container.  
+  
+For example:
+
+```yaml
+volumeMounts:
+- name: gcp-token
+  mountPath: /var/run/secrets/gcp
+  readOnly: true
+```
+#### **extraEnv** ~ `array`
+> Default value:
+> ```yaml
+> []
+> ```
+
+Additional environment variables to set in the google-cas-issuer container.  
+  
+For example, point Application Default Credentials at an external_account credential configuration:
+
+```yaml
+extraEnv:
+- name: GOOGLE_APPLICATION_CREDENTIALS
+  value: /var/run/secrets/gcp-config/credentials.json
+```
 #### **nameOverride** ~ `string`
 
 Override the "cert-manager-google-cas-issuer.name" value.
